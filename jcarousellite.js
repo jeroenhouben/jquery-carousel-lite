@@ -37,7 +37,11 @@ $.fn.jCarouselLite = function(options) {
         v = o.visible,
         start = Math.min(o.start, tl-1);
 
-    if (o.circular && !div.data('jc.initialized')) {
+		if (typeof initialized === 'undefined') {
+			initialized = false;
+		}
+
+    if (o.circular && !initialized) {
         ul.prepend(tLi.slice(tl-v-1+1).clone(true))
           .append(tLi.slice(0,v).clone(true));
         start += v;
@@ -45,7 +49,7 @@ $.fn.jCarouselLite = function(options) {
     var li = ul.children('li'),
         itemLength = li.length;
 
-		if (typeof curr === 'undefined') { curr = start; }
+		if (!initialized) { curr = start; }
 
     div.css("visibility", "visible");
 
@@ -67,11 +71,8 @@ $.fn.jCarouselLite = function(options) {
 
     div.css(sizeCss, divSize+"px");                     // Width of the DIV. length of visible images
 
-		if (div.data('jc.initialized')) {
-			return;
-		}
-
-		div.data('jc.initialized', true);
+		if (initialized) { return; }
+		initialized = true;
 
     // CHANGED: bind click handlers to prev and next buttons, if set (Karl Swedberg)
     $.each([ 'btnPrev', 'btnNext' ], function(index, btn) {
