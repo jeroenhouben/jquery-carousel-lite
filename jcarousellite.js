@@ -37,14 +37,16 @@ $.fn.jCarouselLite = function(options) {
         v = o.visible,
         start = Math.min(o.start, tl-1);
 
-    if (o.circular) {
+    if (o.circular && !div.data('jc.initialized')) {
         ul.prepend(tLi.slice(tl-v-1+1).clone(true))
           .append(tLi.slice(0,v).clone(true));
         start += v;
     }
     var li = ul.children('li'),
-        itemLength = li.length,
-        curr = start;
+        itemLength = li.length;
+
+		if (typeof curr === 'undefined') { curr = start; }
+
     div.css("visibility", "visible");
 
     li.css({overflow: o.vertical ? "hidden" : 'visible', 'float': o.vertical ? "none" : "left"});
@@ -54,10 +56,22 @@ $.fn.jCarouselLite = function(options) {
     var ulSize = liSize * itemLength;                   // size of full ul(total length, not just for the visible items)
     var divSize = liSize * v;                           // size of entire div(total length for just the visible items)
 
+		div.data('jc.sizes', {
+			liSize: liSize,
+			ulSize: ulSize,
+			divSize: divSize
+		});
+
     li.css({width: li.width(), height: li.height()});
     ul.css(sizeCss, ulSize+"px").css(animCss, -(curr*liSize));
 
     div.css(sizeCss, divSize+"px");                     // Width of the DIV. length of visible images
+
+		if (div.data('jc.initialized')) {
+			return;
+		}
+
+		div.data('jc.initialized', true);
 
     // CHANGED: bind click handlers to prev and next buttons, if set (Karl Swedberg)
     $.each([ 'btnPrev', 'btnNext' ], function(index, btn) {
@@ -136,6 +150,10 @@ $.fn.jCarouselLite = function(options) {
 
     function go(to) {
       if (!running) {
+				sizes = div.data('jc.sizes');
+				liSize = sizes.liSize;
+				ulSize = sizes.ulSize;
+				divSize = sizes.divSize;
 
         if (o.beforeStart) {
           o.beforeStart.call(this, vis());
